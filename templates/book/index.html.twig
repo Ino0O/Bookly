@@ -9,12 +9,23 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+<h1>📚 Ma bibliothèque</h1>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/gacha/Documents/Projets/Bookly/src/Controller/BookController.php</code></li>
-        <li>Your template at <code>C:/Users/gacha/Documents/Projets/Bookly/templates/book/index.html.twig</code></li>
-    </ul>
+<!--supprimer le message de succes-->
+{% for message in app.flashes('success') %}
+    <div class="flash-success">
+        <span>✅ {{ message }}</span>
+        <button type="button" onclick="this.parentElement.remove()">×</button>
+    </div>
+{% endfor %}
+
+<a href="{{ path('app_book_new') }}">➕ Ajouter un livre</a>
+
+{% for book in books %}
+    <h2>{{ book.title }}</h2>
+    <p>Auteur : {{ book.author }}</p>
+    <a href="{{ path('app_books_show', {id: book.id}) }}">Détail</a>
+{% endfor %}
+
 </div>
 {% endblock %}

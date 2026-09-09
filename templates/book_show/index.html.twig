@@ -3,18 +3,22 @@
 {% block title %}Hello BookShowController!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<h1>📖 {{ book.title }}</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+<p>Auteur : {{ book.author }}</p>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/gacha/Documents/Projets/Bookly/src/Controller/BookShowController.php</code></li>
-        <li>Your template at <code>C:/Users/gacha/Documents/Projets/Bookly/templates/book_show/index.html.twig</code></li>
-    </ul>
-</div>
+<p>Genre : {{ book.genre.name }}</p>
+
+<p>Statut : {{ book.status.value }}</p>
+
+<p>Ajouté le : {{ book.createdAt|date('d/m/Y') }}</p>
+
+<a href="{{ path('app_books') }}">← Retour</a>
+
+<a href="{{ path('app_book_edit', {id: book.id}) }}">✏️ Modifier</a>
+
+<form method="post" action="{{ path('app_book_delete', {id: book.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce livre ?');">
+    <button type="submit">🗑️ Supprimer</button>
+</form>
+
 {% endblock %}
