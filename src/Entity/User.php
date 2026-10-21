@@ -8,9 +8,15 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
+#[UniqueEntity(
+    fields: ['email'],
+    message: 'Cette adresse email est déjà utilisée.'
+)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -20,18 +26,51 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: 'L’adresse email est obligatoire.')]
+    #[Assert\Email(message: 'Veuillez entrer une adresse email valide.')]
     private ?string $email = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $verificationToken = null;
+
+    public function getVerificationToken(): ?string
+    {
+        return $this->verificationToken;
+    }
+
+    public function setVerificationToken(?string $verificationToken): static
+    {
+        $this->verificationToken = $verificationToken;
+
+        return $this;
+    }
+
+    #[ORM\Column]
+    private bool $isVerified = false;
+
     /**
-     * @var list<string> The user roles
+     * @var list<string> Les rôles de l'utilisateur
      */
     #[ORM\Column]
     private array $roles = [];
 
     /**
-     * @var string The hashed password
+     * @var string Le mot de passe haché
      */
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le mot de passe est obligatoire.')]
+    #[Assert\Length(
+        min: 8,
+        minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.'
+    )]
+    #[Assert\Regex(
+        pattern: '/[A-Z]/',
+        message: 'Le mot de passe doit contenir au moins une majuscule.'
+    )]
+    #[Assert\Regex(
+        pattern: '/[^a-zA-Z0-9]/',
+        message: 'Le mot de passe doit contenir au moins un symbole.'
+    )]
     private ?string $password = null;
 
     /**
@@ -62,8 +101,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
     /**
-     * A visual identifier that represents this user.
+     * Un identifiant visuel qui représente cet utilisateur.
      *
      * @see UserInterface
      */
@@ -78,7 +129,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
+        // Garantit que chaque utilisateur possède au minimum ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
@@ -110,7 +161,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
+     * S'assure que la session ne contient pas les véritables hash de mots de passe
+     * en les hachant avec CRC32C, fonctionnalité prise en charge depuis Symfony 7.3.
      */
     public function __serialize(): array
     {
@@ -141,7 +193,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeBook(Book $book): static
     {
         if ($this->books->removeElement($book)) {
-            // set the owning side to null (unless already changed)
+            // Définit le côté propriétaire à null (sauf s'il a déjà été modifié)
             if ($book->getOwner() === $this) {
                 $book->setOwner(null);
             }

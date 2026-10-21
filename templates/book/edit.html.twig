@@ -1,3 +1,37 @@
-<h1>✏️ Modifier le livre</h1>
+{% extends 'base.html.twig' %}
 
-{{ form(form) }}
+{% block title %}Modifier le livre{% endblock %}
+
+{% block body %}
+
+<div class="book-form-page">
+    <div class="book-form-card">
+        <div class="book-form-header">
+            <h1>Modifier le livre</h1>
+        </div>
+        {{ form_start(form) }}
+            <div class="book-form-fields">
+
+                {{ form_row(form.title) }}
+
+                {{ form_row(form.author) }}
+
+                {{ form_row(form.status) }}
+
+                {{ form_row(form.genre) }}
+
+                {{ form_rest(form) }}
+
+            </div>
+            <div class="book-form-actions">
+                <a
+                    href="{{ path('app_books') }}"
+                    class="form-back-link">
+                    ← Retour
+                </a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}

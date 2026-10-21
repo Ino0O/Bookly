@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des genres{% endblock %}
+
+{% block body %}
+
+<div class="genres-page">
+    <div class="genres-header">
+        <div>
+            <p class="genres-eyebrow">Administration</p>
+            <h1>Gestion des genres</h1>
+            <p>Ajoutez, consultez et gérez les genres disponibles sur Bookly.</p>
+        </div>
+        <a href="{{ path('app_admin_genre_new') }}" class="genres-add-button">
+            + Ajouter un genre
+        </a>
+    </div>
+    <div class="genres-card">
+        {% if genres is empty %}
+            <div class="genres-empty">
+                <h2>Aucun genre</h2>
+                <p>Il n'y a encore aucun genre enregistré.</p>
+            </div>
+        {% else %}
+            <ul class="genres-list">
+                {% for genre in genres %}
+                    <li class="genre-item">
+                        <div class="genre-name">
+                            <span class="genre-icon">📖</span>
+                            <span>{{ genre.name }}</span>
+                        </div>
+                        <form
+                            method="post"
+                            action="{{ path('app_admin_genre_delete', {id: genre.id}) }}"
+                            onsubmit="return confirm('Voulez-vous vraiment supprimer ce genre ?');">
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('delete_genre_' ~ genre.id) }}">
+                            <button type="submit" class="genre-delete-button">
+                                Supprimer
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <a href="{{ path('app_admin') }}" class="genres-back-link">
+        Retour à l'administration
+    </a>
+</div>
+
+{% endblock %}

@@ -1,16 +1,31 @@
-
 services:
     database:
         image: mysql:8.0
         environment:
             MYSQL_DATABASE: app
             MYSQL_USER: app
-            MYSQL_PASSWORD: "PLACEHOLDER_APP_SECRET!"
-            MYSQL_ROOT_PASSWORD: "PLACEHOLDER_ROOT_SECRET"
+            MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+            MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
         ports:
             - "3307:3306"
         volumes:
             - database_data:/var/lib/mysql
+
+    phpmyadmin:
+        image: phpmyadmin:latest
+        depends_on:
+            - database
+        environment:
+            PMA_HOST: database
+            PMA_PORT: 3306
+        ports:
+            - "8080:80"
+
+    mailpit:
+        image: axllent/mailpit
+        ports:
+            - "8025:8025"
+            - "1025:1025"
 
 volumes:
     database_data:

@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un genre{% endblock %}
+
+{% block body %}
+
+<div class="genre-form-page">
+    <div class="genre-form-card">
+        <div class="genre-form-header">
+            <div>
+                <h1>Ajouter un genre</h1>
+                <p>Ajoutez un nouveau genre à votre bibliothèque.</p>
+            </div>
+        </div>
+        {{ form_start(form) }}
+            <div class="genre-form-fields">
+                {{ form_widget(form) }}
+            </div>
+        {{ form_end(form) }}
+        <a href="{{ path('app_admin_genres') }}" class="genre-form-back-link">
+            Retour aux genres
+        </a>
+    </div>
+</div>
+{% endblock %}

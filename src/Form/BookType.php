@@ -12,6 +12,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use App\Enum\BookStatus;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\Image;
 
 class BookType extends AbstractType
 {
@@ -22,17 +24,33 @@ class BookType extends AbstractType
             ->add('title')
             ->add('author')
             ->add('status', EnumType::class, [
-    'class' => BookStatus::class,
-    'choice_label' => fn (BookStatus $status) => $status->value,
-])
+            'class' => BookStatus::class,
+            'choice_label' => fn (BookStatus $status) => $status->value,
+            ])
             ->add('genre', EntityType::class, [
                 'class' => Genre::class,
                 'choice_label' => 'name',
             ])
-            ->add('submit', SubmitType::class, [
-            'label' => $options['submit_label'],
+            ->add('image', FileType::class, [
+            'label' => 'Image de couverture',
+            'mapped' => false,
+            'required' => false,
+            'constraints' => [
+                new Image(
+                maxSize: '5M',
+                mimeTypes: [
+                    'image/jpeg',
+                    'image/png',
+                    'image/webp',
+            ],
+                mimeTypesMessage: 'Veuillez sélectionner une image JPEG, PNG ou WebP.',
+        ),
+    ],
 ])
-        ;
+        ->add('submit', SubmitType::class, [
+                    'label' => $options['submit_label'],
+                    ]);
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

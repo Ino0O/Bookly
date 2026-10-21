@@ -1,31 +1,122 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello BookController!{% endblock %}
+{% block title %}Bibliothèque{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-<h1>📚 Ma bibliothèque</h1>
+<div class="books-page">
 
-<!--supprimer le message de succes-->
-{% for message in app.flashes('success') %}
-    <div class="flash-success">
-        <span>✅ {{ message }}</span>
-        <button type="button" onclick="this.parentElement.remove()">×</button>
+    <!-- Recherche et filtres -->
+    <div class="books-filters">
+        <form method="get" action="{{ path('app_books') }}">
+            <div class="search-bar">
+                <input
+                    type="search"
+                    name="search"
+                    placeholder="Rechercher un livre..."
+                    value="{{ app.request.query.get('search') }}"
+                >
+                <button type="submit">
+                    Rechercher
+                </button>
+            </div>
+            <div class="filters">
+                <select name="status">
+                    <option value="">Tous les statuts</option>
+                    <option value="À lire">À lire</option>
+                    <option value="En cours">En cours</option>
+                    <option value="Terminé">Terminé</option>
+                </select>
+                <select name="genre">
+                    <option value="">Tous les genres</option>
+                    {% for genre in genres %}
+                        <option
+                            value="{{ genre.id }}"
+                            {% if app.request.query.get('genre') == genre.id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ genre.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
     </div>
-{% endfor %}
 
-<a href="{{ path('app_book_new') }}">➕ Ajouter un livre</a>
+    <!-- En-tête de la bibliothèque -->
+    <div class="books-header">
+        <h1>Ma bibliothèque</h1>
+        <a href="{{ path('app_book_new') }}" class="add-book-button">
+            ➕ Ajouter un livre
+        </a>
+    </div>
 
-{% for book in books %}
-    <h2>{{ book.title }}</h2>
-    <p>Auteur : {{ book.author }}</p>
-    <a href="{{ path('app_books_show', {id: book.id}) }}">Détail</a>
-{% endfor %}
+    <!-- Message de succès -->
+    {% for message in app.flashes('success') %}
+        <div class="flash-success">
+            <span>✅ {{ message }}</span>
+            <button
+                type="button"
+                onclick="this.parentElement.remove()">
+                ×
+            </button>
+        </div>
+    {% endfor %}
+
+    <!-- Liste des livres -->
+<!-- Liste des livres -->
+<div class="books-grid">
+
+    {% for book in books %}
+
+        <article class="book-card">
+
+            {% if book.imageFilename %}
+
+                <img
+                    src="/uploads/books/{{ book.imageFilename }}"
+                    alt="Couverture de {{ book.title }}"
+                    class="book-cover"
+                >
+
+            {% else %}
+
+                <div class="book-cover-placeholder">
+                    📖
+                    <span>Aucune couverture</span>
+                </div>
+
+            {% endif %}
+
+
+            <div class="book-card-content">
+                <h2>{{ book.title }}</h2>
+                <p class="book-author">
+                    {{ book.author }}
+                </p>
+                <span class="book-status
+                    {% if book.status.value == 'À lire' %}
+                        status-to-read
+                    {% elseif book.status.value == 'En cours' %}
+                        status-reading
+                    {% elseif book.status.value == 'Terminé' %}
+                        status-finished
+                    {% endif %}
+                ">
+                    {{ book.status.value }}
+                </span>
+                <a
+                    href="{{ path('app_books_show', {id: book.id}) }}"
+                    class="book-detail-button">
+                    Voir le détail
+                </a>
+            </div>
+        </article>
+
+    {% endfor %}
 
 </div>
+</div>
+
 {% endblock %}

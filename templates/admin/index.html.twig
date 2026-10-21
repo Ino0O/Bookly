@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block body %}
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <p class="admin-eyebrow">Espace administrateur</p>
+            <h1>Administration</h1>
+            <p>
+                Gérez les utilisateurs, les genres et les messages reçus.
+            </p>
+        </div>
+        <a
+            href="{{ path('app_admin_genres') }}"
+            class="admin-genres-link">
+            Gérer les genres
+        </a>
+    </div>
+    {#Utilisateurs#}
+    <section class="admin-section">
+        <div class="admin-section-header">
+            <div>
+                <h2>Utilisateurs</h2>
+                <p>Gérez les comptes présents sur Bookly.</p>
+            </div>
+        </div>
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Rôles</th>
+                        <th>Vérifié</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <span class="admin-id">
+                                    #{{ user.id }}
+                                </span>
+                            </td>
+                            <td class="admin-email">
+                                {{ user.email }}
+                            </td>
+                            <td>
+                                {% for role in user.roles %}
+                                    <span class="admin-role">
+                                        {{ role }}
+                                    </span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if user.isVerified %}
+                                    <span class="admin-status verified">
+                                        ✓ Vérifié
+                                    </span>
+                                {% else %}
+                                    <span class="admin-status not-verified">
+                                        Non vérifié
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user != app.user %}
+                                    <form
+                                        method="post"
+                                        action="{{ path('app_admin_user_delete', {id: user.id}) }}"
+                                        onsubmit="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{ csrf_token('delete_user_' ~ user.id) }>
+                                        <button
+                                            type="submit"
+                                            class="admin-delete-button">
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="admin-current-user">
+                                        Votre compte
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="admin-empty">
+                                Aucun utilisateur.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {#Message#}
+    <section class="admin-section">
+        <div class="admin-section-header">
+            <div>
+                <h2>Messages de contact</h2>
+                <p>Les messages envoyés depuis la page contact.</p>
+            </div>
+        </div>
+        {% if messages is empty %}
+            <div class="admin-empty-card">
+                <span>📭</span>
+                <p>Aucun message reçu.</p>
+            </div>
+        {% else %}
+            <div class="admin-table-container">
+                <table class="admin-table messages-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Sujet</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for message in messages %}
+                            <tr>
+                                <td>
+                                    {{ message.name }}
+                                </td>
+                                <td class="admin-email">
+                                    {{ message.email }}
+                                </td>
+                                <td class="admin-message-subject">
+                                    {{ message.subject }}
+                                </td>
+                                <td class="admin-message-content">
+                                    {{ message.message }}
+                                </td>
+                                <td class="admin-date">
+                                    {{ message.createdAt|date('d/m/Y H:i') }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </section>
+</div>
+
+{% endblock %}

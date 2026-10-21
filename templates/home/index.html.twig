@@ -1,12 +1,55 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Accueil - Bookly{% endblock %}
-
 {% block body %}
 
-    <h1>BOOKLY</h1>
+<section class="home-hero">
+    <div class="home-hero-content">
+        <p class="home-eyebrow">Votre bibliothèque personnelle</p>
+        <h1>
+            Bienvenue sur <span>Bookly</span>
+        </h1>
+        <p class="home-description">
+            Organisez vos lectures, retrouvez vos livres préférés
+            et gardez votre bibliothèque toujours à portée de main.
+        </p>
+        <div class="home-actions">
+            <a
+                href="{{ path('app_books') }}"
+                class="home-primary-button">
+                Voir ma bibliothèque
+            </a>
+            {% if app.user %}
+                <a
+                    href="{{ path('app_book_new') }}"
+                    class="home-secondary-button">
+                    + Ajouter un livre
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+<section class="home-features">
+    <div class="home-feature">
+        <h3>Organisez</h3>
+        <p>
+            Retrouvez facilement tous vos livres
+            dans votre bibliothèque.
+        </p>
+    </div>
+    <div class="home-feature">
+        <h3>Recherchez</h3>
+        <p>
+            Filtrez vos livres par titre, genre
+            ou statut de lecture.
+        </p>
+    </div>
+    <div class="home-feature">
+        <h3>Suivez vos lectures</h3>
+        <p>
+            Gardez un œil sur les livres à lire,
+            en cours ou terminés.
+        </p>
+    </div>
+</section>
 
-    <h2>Bienvenue sur Bookly</h2>
-
-    <h1>Cooking. . .</h1>
 {% endblock %}

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Repository\UserRepository;
 use App\Entity\Book;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,6 +10,8 @@ use App\Repository\BookRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 final class BookShowController extends AbstractController
 {
@@ -21,13 +22,19 @@ final class BookShowController extends AbstractController
         BookRepository $bookRepository,
         Request $request,
         EntityManagerInterface $entityManager,
-        UserRepository $userRepository
+        SluggerInterface $slugger,
     ): Response
     {
         $book = $bookRepository->find($id);
 
+        //erreur
         if (!$book) {
             throw $this->createNotFoundException('Livre introuvable.');
+        }
+
+        //vérifie l'appartenance
+        if ($book->getOwner() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce livre.');
         }
 
         //formulaire de modif
@@ -39,6 +46,27 @@ final class BookShowController extends AbstractController
 
         //Vérification et redirection
         if ($form->isSubmitted() && $form->isValid()) {
+
+        $imageFile = $form->get('image')->getData();
+
+        if ($imageFile instanceof UploadedFile) {
+            $originalFilename = pathinfo(
+                $imageFile->getClientOriginalName(),
+                PATHINFO_FILENAME
+            );
+
+            $safeFilename = $slugger->slug($originalFilename);
+
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+            $imageFile->move(
+                $this->getParameter('kernel.project_dir') . '/public/uploads/books',
+                $newFilename
+            );
+
+            $book->setImageFilename($newFilename);
+        }
+
         $entityManager->flush();
 
         $this->addFlash('success', 'Le livre a bien été modifié !');
@@ -46,51 +74,69 @@ final class BookShowController extends AbstractController
         return $this->redirectToRoute('app_books');
     }
 
-        //Afficher la
+        //Afficher le form
         return $this->render('book/edit.html.twig', [
         'form' => $form,
     ]);
-    
+
     }
 
 //Méthode pour ajouter
-    #[Route('/books/new', name: 'app_book_new')]
-    public function new(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        UserRepository $userRepository
-    ): Response
-    {
-        $book = new Book();
+#[Route('/books/new', name: 'app_book_new')]
+public function new(
+    Request $request,
+    EntityManagerInterface $entityManager,
+    SluggerInterface $slugger
+): Response
+{
+    $book = new Book();
 
-        //formulaire pour le livre
-        $form = $this->createForm(BookType::class, $book);
+    // formulaire pour le livre
+    $form = $this->createForm(BookType::class, $book);
 
-        $form->handleRequest($request);
+    $form->handleRequest($request);
 
-        //Validation du formulaire
-        if ($form->isSubmitted() && $form->isValid()) {
-            $book->setCreatedAt(new \DateTimeImmutable());
+    // Validation du formulaire
+    if ($form->isSubmitted() && $form->isValid()) {
 
-            $user = $userRepository->findOneBy([        
-            'email' => 'ino@example.com'
-            ]);
+        $imageFile = $form->get('image')->getData();
 
-            $book->setOwner($user);
+        if ($imageFile instanceof UploadedFile) {
 
-            $entityManager->persist($book);
-            $entityManager->flush();
+            $originalFilename = pathinfo(
+                $imageFile->getClientOriginalName(),
+                PATHINFO_FILENAME
+            );
 
-            $this->addFlash('success', 'Le livre a bien été ajouté !');
+            $safeFilename = $slugger->slug($originalFilename);
 
-            return $this->redirectToRoute('app_books');
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+            $imageFile->move(
+                $this->getParameter('kernel.project_dir') . '/public/uploads/books',
+                $newFilename
+            );
+
+            $book->setImageFilename($newFilename);
         }
 
-        return $this->render('book/new.html.twig', [
-            'form' => $form,
-        ]);
+        $book->setCreatedAt(new \DateTimeImmutable());
+
+        // récupère l'utilisateur
+        $book->setOwner($this->getUser());
+
+        $entityManager->persist($book);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le livre a bien été ajouté !');
+
+        return $this->redirectToRoute('app_books');
     }
 
+    return $this->render('book/new.html.twig', [
+        'form' => $form,
+    ]);
+}
    //Méthode pour afficher un livre
     #[Route('/books/{id<\d+>}', name: 'app_books_show')]
     public function index(
@@ -105,9 +151,12 @@ final class BookShowController extends AbstractController
             throw $this->createNotFoundException('Livre introuvable.');
         }
 
+        //vérifie l'appartenance du livre
+        if ($book->getOwner() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce livre.');
+        }
         return $this->render('book_show/index.html.twig', [
             'book' => $book,
-            'controller_name' => 'BookShowController',
         ]);
     }
 
@@ -122,8 +171,14 @@ final class BookShowController extends AbstractController
         //Cherche le livre en question
         $book = $bookRepository->find($id);
 
+        //erreur
         if (!$book) {
             throw $this->createNotFoundException('Livre introuvable.');
+        }
+
+        //vérifie l'appartenance
+        if ($book->getOwner() !== $this->getUser()) {
+        throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce livre.');
         }
 
         //Le supprime et redirige

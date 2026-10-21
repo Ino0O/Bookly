@@ -1,0 +1,14 @@
+public/css/app.css:80: trailing whitespace.
+[32m+[m[32m    transition:[m[41m [m
+src/Controller/BookShowController.php:69: trailing whitespace.
+[32m+[m[41m        [m
+src/Controller/BookShowController.php:154: trailing whitespace.
+[32m+[m[32m        //vérifie l'appartenance du livre[m[41m  [m
+src/Controller/RegistrationController.php:42: trailing whitespace.
+[32m+[m[41m    [m
+src/Controller/RegistrationController.php:62: trailing whitespace.
+[32m+[m[41m    [m
+src/Form/BookType.php:33: trailing whitespace.
+[32m+[m[32m            ])[m[41m [m
+templates/base.html.twig:10: trailing whitespace.
+[32m+[m[41m        [m

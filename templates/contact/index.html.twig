@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact{% endblock %}
+
+{% block body %}
+
+<div class="contact-page">
+    <div class="contact-card">
+        <div class="contact-header">
+           <div>
+                <h1>Nous contacter</h1>
+                <p>
+                    Une question, une suggestion ou un petit souci ?
+                    Écris-nous !
+                </p>
+            </div>
+        </div>
+        {% for message in app.flashes('success') %}
+            <div class="flash-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {{ form_start(form) }}
+            <div class="contact-fields">
+                {{ form_widget(form) }}
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}
